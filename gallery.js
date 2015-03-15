@@ -7,6 +7,20 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+//@todo list subdirectories when click on directory (or treeview processing)
+//@todo show dir title in <h1> or whatever
+//@todo fix spinner when showme clicked twice
+//@todo display picture if set in route (= ability to bookmark images) @see bodyonload
+//@todo if picture is set in route and bookmarked, we need to know if there are prev and next img hum ?
+//@todo change <title> on the fly
+//@todo make $http service url configurable options
+
+//@todo, add a true (&& responsive) layout...OH REALLY ?
+//@todo clean console.log and useless $scope instanciation
+//@todo refactor to avoid some duplicate and quick code/hack
+//@todo bower, unit-tests and so on
+
+
 'use strict';
 
 var gallery = angular.module('gallery', ['ngRoute']);
@@ -133,7 +147,6 @@ gallery.directive('bodyonload', function () {
     };
 });
 
-
 gallery.factory("imgService",
     function ($http) {
         return {
@@ -143,6 +156,7 @@ gallery.factory("imgService",
         }
     }
 );
+
 // needs to be a promise as the data is fetch async.
 gallery.service("dirListService",
     function ($http) {
