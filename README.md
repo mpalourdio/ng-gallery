@@ -3,7 +3,7 @@ AngularJs / PHP simple gallery with async fetch of pictures from local or remote
 
 # TODO
 list subdirectories when click on directory (or treeview processing)  
-show dir title in <h1> or whatever  
+show dir title in h1 or whatever  
 fix spinner when showme clicked twice  
 display picture if set in route (= ability to bookmark images) @see bodyonload  
 if picture is set in route and bookmarked, we need to know if there are prev and next img hum ?  
