@@ -15,7 +15,7 @@ var gallery = angular.module('gallery', ['ngRoute']);
 gallery.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
-            when('/:dir/:img?', {
+            when('/show/:dir?/:img?/:index?', {
                 templateUrl:    'process.html',
                 controller:     'mainctrl',
                 reloadOnSearch: false
@@ -31,7 +31,23 @@ gallery.config(['$routeProvider',
 gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location',
     function ($scope, imgService, dirListService, $routeParams, $location) {
 
+        angular.element(document).ready(function () {
+            if ($routeParams.img) {
+                fromBoormark = true;
+                bookmarkRouteParams = {
+                    dirnameToDisplay: $routeParams.dir,
+                    imgToDisplay:     $routeParams.img,
+                    currentImgIndex:  parseInt($routeParams.index)
+                };
+                processImgRendering();
+            }
+        });
+
+        var fromBoormark = false;
+        var bookmarkRouteParams = {};
+
         $scope.$on('$routeChangeSuccess', function () {
+            console.log('$routeChangeSuccess')
             console.log($routeParams);
         });
 
@@ -41,6 +57,9 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         $scope.howManyImgInDir = 0;
         $scope.currentImgIndex = 0;
 
+        function setLocationSearch() {
+            $location.search({dir: $scope.dirnameToDisplay, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
+        }
 
         function resetScope() {
             $scope.dirnameToDisplay = $routeParams.dir;
@@ -58,7 +77,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.spinner = true;
             $scope.currentImgIndex += 1;
             $scope.imgToDisplay = allImages[$scope.dirnameToDisplay][$scope.currentImgIndex];
-            $location.search('img', $scope.imgToDisplay);
+            setLocationSearch();
             displayPrevAndNextBtn();
         };
 
@@ -66,7 +85,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.spinner = true;
             $scope.currentImgIndex -= 1;
             $scope.imgToDisplay = allImages[$scope.dirnameToDisplay][$scope.currentImgIndex];
-            $location.search('img', $scope.imgToDisplay);
+            setLocationSearch();
             displayPrevAndNextBtn();
         };
 
@@ -89,12 +108,16 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
 
                     if (0 === $scope.howManyImgInDir) {
                         $scope.imgToDisplay = null;
-                        $location.search({img: $scope.imgToDisplay});
                         $scope.alertNoImg = true;
                     } else {
+                        if (fromBoormark) {
+                            $scope.dirnameToDisplay = bookmarkRouteParams.dirnameToDisplay;
+                            $scope.currentImgIndex = bookmarkRouteParams.currentImgIndex;
+                        }
+
                         displayPrevAndNextBtn();
                         $scope.imgToDisplay = data[$scope.dirnameToDisplay][$scope.currentImgIndex];
-                        $location.search({img: $scope.imgToDisplay});
+                        setLocationSearch();
                     }
 
 
@@ -117,17 +140,6 @@ gallery.directive('imageonload', function () {
         link:     function (scope, element, attrs) {
             element.bind('load', function () {
                 scope.$apply('showSpinner(false)');
-            });
-        }
-    };
-});
-
-gallery.directive('bodyonload', function () {
-    return {
-        restrict: 'A',
-        link:     function (scope, element, attrs) {
-            element.bind('load', function () {
-                scope.$apply('showimg');
             });
         }
     };
