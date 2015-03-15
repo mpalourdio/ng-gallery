@@ -12,7 +12,11 @@ howManyImgInDir : {{howManyImgInDir}} currentImgIndex : {{currentImgIndex}}
 <button ng-click="showimg()" ng-show="showGoButton" class="ng-show">showme</button>
 
 <span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
-<a href="#/dir">Route 1</a><br/>
+
+<div ng-repeat="dir in dirlist">
+    <a href="#/{{dir}}">{{dir}}</a><br/>
+</div>
+
 <img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
 
 <div ng-if="imgToDisplay != null" >

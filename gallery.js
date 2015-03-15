@@ -28,8 +28,8 @@ gallery.config(['$routeProvider',
     }]);
 
 
-gallery.controller('mainctrl', ['$scope', 'imgService', '$routeParams', '$location',
-    function ($scope, imgService, $routeParams, $location) {
+gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location',
+    function ($scope, imgService, dirListService, $routeParams, $location) {
 
         $scope.$on('$routeChangeSuccess', function () {
             console.log($routeParams);
@@ -105,6 +105,10 @@ gallery.controller('mainctrl', ['$scope', 'imgService', '$routeParams', '$locati
         $scope.showimg = function () {
             processImgRendering();
         };
+
+        dirListService.async().then(function (data) {
+            $scope.dirlist = data;
+        });
     }]);
 
 gallery.directive('imageonload', function () {
@@ -117,9 +121,8 @@ gallery.directive('imageonload', function () {
         }
     };
 });
+
 gallery.directive('bodyonload', function () {
-    console.log('oui')
-    ;
     return {
         restrict: 'A',
         link:     function (scope, element, attrs) {
@@ -138,5 +141,17 @@ gallery.factory("imgService",
                 $http.get("listfiles.php?dirname=" + dirname).success(callback).error(callback);
             }
         }
+    }
+);
+// needs to be a promise as the data is fetch async.
+gallery.service("dirListService",
+    function ($http) {
+        return {
+            async: function () {
+                return $http.get('listdir.php').then(function (response) {
+                    return response.data;
+                });
+            }
+        };
     }
 );
