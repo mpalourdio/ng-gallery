@@ -7,7 +7,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-//@todo quick and dirty. Should use *Iterator from SPL
 
 $allImages = [];
 if (isset($_GET['dirname']) && $_GET['dirname'] !== '') {
