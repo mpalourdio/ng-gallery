@@ -1,0 +1,25 @@
+<!-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+     FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+     COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+     IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+
+<input type="text" ng-model="dirnameToDisplay" disabled="disabled">
+
+howManyImgInDir : {{howManyImgInDir}} currentImgIndex : {{currentImgIndex}}
+
+<button ng-click="showimg()">showme</button>
+
+<span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
+<a href="#/dir">Route 1</a><br/>
+<img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
+
+<div ng-if="imgToDisplay != null" >
+    <div>
+        image {{currentImgIndex+1}}/{{howManyImgInDir}}
+        <button ng-model="prev" ng-show="showPrevButton" class="showPrev" ng-click="showPrevImg()"><<</button>
+        <button ng-model="next" ng-show="showNextButton" class="showNext" ng-click="showNextImg()">>></button>
+    </div>
+    <img ng-src="{{dirnameToDisplay}}/{{imgToDisplay}}" width="1200" imageonload>
+</div>
