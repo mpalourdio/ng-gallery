@@ -70,6 +70,8 @@ gallery.controller('mainctrl', ['$scope', 'imgService', '$routeParams', '$locati
             displayPrevAndNextBtn();
         };
 
+        $scope.showGoButton = $routeParams.dir != '' && $routeParams.dir != null;
+
         //useful for directices $apply
         $scope.showSpinner = function (value) {
             $scope.spinner = value;
