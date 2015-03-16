@@ -12,10 +12,10 @@ $dir     = new DirectoryIterator('.');
 $allDirs = [];
 
 foreach ($dir as $fileinfo) {
-    if ($fileinfo->isDir() && !$fileinfo->isDot()) {
+    if ($fileinfo->isDir() && !$fileinfo->isDot()  && substr($fileinfo->getFilename(), 0, 1) != '.') {
         $allDirs[] = $fileinfo->getFilename();
     }
 }
-
+sort($allDirs);
 header('Content-type: application/json');
 echo json_encode($allDirs);
