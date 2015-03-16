@@ -6,15 +6,13 @@
      CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
 
 <input type="text" ng-model="dirnameToDisplay" disabled="disabled">
-
-howManyImgInDir : {{howManyImgInDir}} currentImgIndex : {{currentImgIndex}}
-
-<button ng-click="showimg()" ng-show="showGoButton" class="ng-show">showme</button>
+howManyImgInDir : {{howManyImgInDir}} currentImgIndex : {{currentImgIndex}}<br />
+<button ng-click="displayGallery()" ng-show="showGoButton" class="ng-show">showme</button>
 
 <span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
 
 <div ng-repeat="dir in dirlist">
-    <a href="#/{{dir}}">{{dir}}</a><br/>
+    <a href="#/show?dir={{dir}}" onchangedirectory>{{dir}}</a><br/>
 </div>
 
 <img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
