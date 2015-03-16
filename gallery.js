@@ -102,7 +102,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         });
 
         angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
-            $scope.$on(value, function (event) {
+            $scope.$on(value, function () {
                 setDirnameToDisplayFromRoute();
                 setIndexToDisplayFromRoute();
                 setImgToDisplayFromRoute();
@@ -167,7 +167,6 @@ gallery.directive('onchangedirectory', function () {
     };
 });
 
-//@todo use $q
 gallery.service('imgService', function ($http) {
         return {
             async: function (dirname) {
@@ -179,8 +178,6 @@ gallery.service('imgService', function ($http) {
     }
 );
 
-// needs to be a promise as the data is fetch async.
-// @todo use $q
 gallery.service('dirListService', function ($http) {
         return {
             async: function () {
