@@ -4,24 +4,33 @@
      COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
      IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
      CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
+<header class="navbar navbar-static-top bs-docs-nav" id="top" role="banner">
+    <h1 type="text" disabled="disabled">{{ dirnameToDisplay }}</h1>
+    <span class="label label-info">howManyImgInDir : {{howManyImgInDir}}</span> <span class="label label-info">currentImgIndex : {{currentImgIndex}}</span>
+    <button ng-click="displayGallery()" ng-show="showGoButton" class="ng-show btn btn-default">showme</button>
+    <span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
+    <img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
+</header>
 
-<input type="text" ng-model="dirnameToDisplay" disabled="disabled">
-howManyImgInDir : {{howManyImgInDir}} currentImgIndex : {{currentImgIndex}}<br />
-<button ng-click="displayGallery()" ng-show="showGoButton" class="ng-show">showme</button>
-
-<span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
-
-<div ng-repeat="dir in dirlist">
-    <a href="#/show?dir={{dir}}" onchangedirectory>{{dir}}</a><br/>
-</div>
-
-<img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
-
-<div ng-if="imgToDisplay != null" >
-    <div>
-        image {{currentImgIndex+1}}/{{howManyImgInDir}}
-        <button ng-model="prev" ng-show="showPrevButton" class="showPrev" ng-click="showPrevImg()"><<</button>
-        <button ng-model="next" ng-show="showNextButton" class="showNext" ng-click="showNextImg()">>></button>
+<div class="row">
+    <div class="col-md-2 col-sm-2 col-xs-2">
+        <ul>
+            <li ng-repeat="dir in dirlist"><a href="#/show?dir={{dir}}" onchangedirectory>{{dir}}</a></li>
+        </ul>
     </div>
-    <img ng-src="{{dirnameToDisplay}}/{{imgToDisplay}}" width="1200" imageonload>
+
+    <div ng-if="imgToDisplay != null" class="col-md-10 col-sm-10 col-xs-10">
+        <div class="col-md-10 col-sm-10 col-xs-10" class="pagination">
+            <nav>
+                <ul class="pager">
+                    <li class="previous"><a ng-click="showPrevImg()" class="showPrev" ng-show="showPrevButton" ng-model="prev"><span aria-hidden="true">&larr;</span></a></li>
+                    <span class="badge">{{currentImgIndex+1}}/{{howManyImgInDir}}</span>
+                    <li class="next"><a ng-click="showNextImg()" class="next showNext" ng-show="showNextButton" ng-model="next"><span aria-hidden="true">&rarr;</span></a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-md-10 col-sm-10 col-xs-10">
+            <img ng-src="{{dirnameToDisplay}}/{{imgToDisplay}}" class="img-responsive image" imageonload>
+        </div>
+    </div>
 </div>
