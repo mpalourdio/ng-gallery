@@ -11,68 +11,110 @@
 
 var gallery = angular.module('gallery', ['ngRoute']);
 
-
 gallery.config(['$routeProvider',
     function ($routeProvider) {
         $routeProvider.
-            when('/:dir/:img?', {
+            when('/show/:dir?/:img?/:index?', {
                 templateUrl:    'process.html',
                 controller:     'mainctrl',
                 reloadOnSearch: false
             }).
             otherwise({
-                redirectTo:  '/',
+                redirectTo:  '/show',
                 templateUrl: 'process.html',
                 controller:  'mainctrl'
             });
     }]);
 
-
 gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location',
     function ($scope, imgService, dirListService, $routeParams, $location) {
 
-        $scope.$on('$routeChangeSuccess', function () {
-            console.log($routeParams);
-        });
-
+        var dirNameFromRoute;
+        /*var imgNameFromRoute;
+        var indexFromRoute;/*
         var allImages;
 
-        $scope.dirnameToDisplay = $routeParams.dir;
-        $scope.howManyImgInDir = 0;
-        $scope.currentImgIndex = 0;
+        var setDirnameToDisplayFromRoute = function () {
+            if ($routeParams.dir) {
+                dirNameFromRoute = $routeParams.dir;
+                $scope.showGoButton = true;
+            }
 
+            $scope.dirnameToDisplay = dirNameFromRoute;
+        };
 
-        function resetScope() {
-            $scope.dirnameToDisplay = $routeParams.dir;
+        /*var setImgToDisplayFromRoute = function () {
+            console.log('setImgToDisplayFromRoute');
+            if ($routeParams.img) {
+                imgNameFromRoute = $routeParams.img;
+            }
+
+            $scope.imgToDisplay = imgNameFromRoute;
+        };
+
+        var setIndexToDisplayFromRoute = function () {
+            console.log('setIndexToDisplayFromRoute');
+            if ($routeParams.index) {
+                indexFromRoute = $routeParams.index;
+            }
+
+            $scope.currentImgIndex = parseInt(indexFromRoute);
+        };*/
+
+        var setLocationSearch = function () {
+            $location.search({dir: dirNameFromRoute, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
+        };
+
+        $scope.resetScope = function () {
+            setDirnameToDisplayFromRoute();
             $scope.howManyImgInDir = 0;
             $scope.currentImgIndex = 0;
+            $scope.imgToDisplay = null;
             $scope.alertNoImg = false;
-        }
+        };
 
-        function displayPrevAndNextBtn() {
+        var displayPrevAndNextBtn = function () {
             $scope.showPrevButton = $scope.currentImgIndex > 0;
             $scope.showNextButton = $scope.currentImgIndex < $scope.howManyImgInDir - 1;
-        }
+        };
+
+
+        /*angular.element(document).ready(function () {
+            console.log('ready');
+            $scope.resetScope();
+            if ($routeParams.dir) {
+                setDirnameToDisplayFromRoute();
+            }
+            if ($routeParams.img && $routeParams.index) {
+                setImgToDisplayFromRoute();
+                setIndexToDisplayFromRoute();
+            }
+        });*/
+
+        $scope.$on('$routeChangeSuccess', function () {
+            setDirnameToDisplayFromRoute();
+        });
+
+        $scope.$on('$routeUpdate', function () {
+            setDirnameToDisplayFromRoute();
+        });
 
         $scope.showNextImg = function () {
             $scope.spinner = true;
             $scope.currentImgIndex += 1;
-            $scope.imgToDisplay = allImages[$scope.dirnameToDisplay][$scope.currentImgIndex];
-            $location.search('img', $scope.imgToDisplay);
+            $scope.imgToDisplay = allImages[dirNameFromRoute][$scope.currentImgIndex];
+            setLocationSearch();
             displayPrevAndNextBtn();
         };
 
         $scope.showPrevImg = function () {
             $scope.spinner = true;
             $scope.currentImgIndex -= 1;
-            $scope.imgToDisplay = allImages[$scope.dirnameToDisplay][$scope.currentImgIndex];
-            $location.search('img', $scope.imgToDisplay);
+            $scope.imgToDisplay = allImages[dirNameFromRoute][$scope.currentImgIndex];
+            setLocationSearch();
             displayPrevAndNextBtn();
         };
 
-        $scope.showGoButton = $routeParams.dir != '' && $routeParams.dir != null;
-
-        //useful for directices $apply
         $scope.showSpinner = function (value) {
             $scope.spinner = value;
         };
@@ -81,31 +123,26 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.spinner = true;
             imgService.returnByDirname(
                 function (data) {
-
-                    resetScope();
                     allImages = data;
-
-                    $scope.howManyImgInDir = data[$scope.dirnameToDisplay].length;
+                    $scope.howManyImgInDir = data[dirNameFromRoute].length;
 
                     if (0 === $scope.howManyImgInDir) {
-                        $scope.imgToDisplay = null;
-                        $location.search({img: $scope.imgToDisplay});
+                        $scope.resetScope();
                         $scope.alertNoImg = true;
                     } else {
                         displayPrevAndNextBtn();
-                        $scope.imgToDisplay = data[$scope.dirnameToDisplay][$scope.currentImgIndex];
-                        $location.search({img: $scope.imgToDisplay});
+                        $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
+                        setLocationSearch();
                     }
 
 
-                }, $scope.dirnameToDisplay
+                }, dirNameFromRoute
             );
         }
 
-        $scope.showimg = function () {
+        $scope.displayGallery = function () {
             processImgRendering();
         };
-
         dirListService.async().then(function (data) {
             $scope.dirlist = data;
         });
@@ -122,12 +159,13 @@ gallery.directive('imageonload', function () {
     };
 });
 
-gallery.directive('bodyonload', function () {
+gallery.directive('onchangedirectory', function () {
     return {
         restrict: 'A',
         link:     function (scope, element, attrs) {
-            element.bind('load', function () {
-                scope.$apply('showimg');
+            element.bind('click', function () {
+                scope.resetScope();
+                scope.currentImgIndex = 666;
             });
         }
     };
