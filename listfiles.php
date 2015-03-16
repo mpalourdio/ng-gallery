@@ -7,10 +7,9 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+$allImages[$_GET['dirname']] = [];
 if (isset($_GET['dirname']) && $_GET['dirname'] !== '') {
     $dir                  = new DirectoryIterator($_GET['dirname']);
-    $allImages            = [];
     $authorizedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
     foreach ($dir as $fileinfo) {
         if (!$fileinfo->isDir() && !$fileinfo->isDot()) {
