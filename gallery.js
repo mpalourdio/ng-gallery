@@ -143,6 +143,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         $scope.displayGallery = function () {
             processImgRendering();
         };
+
         dirListService.async().then(function (data) {
             $scope.dirlist = data;
         });
@@ -165,7 +166,6 @@ gallery.directive('onchangedirectory', function () {
         link:     function (scope, element, attrs) {
             element.bind('click', function () {
                 scope.resetScope();
-                scope.currentImgIndex = 666;
             });
         }
     };
