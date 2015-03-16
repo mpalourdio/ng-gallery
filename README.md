@@ -2,6 +2,7 @@
 AngularJs / PHP simple gallery with async fetch of pictures from local or remote server
 
 # TODO
+use $q
 list subdirectories when click on directory (or treeview processing)  
 show dir title in h1 or whatever
 change <title> on the fly  

@@ -67,18 +67,32 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $location.search({dir: dirNameFromRoute, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
         };
 
-        $scope.resetScope = function () {
-            setDirnameToDisplayFromRoute();
-            $scope.howManyImgInDir = 0;
-            setIndexToDisplayFromRoute();
-            setImgToDisplayFromRoute();
-            $scope.alertNoImg = false;
-        };
-
         var displayPrevAndNextBtn = function () {
             $scope.showPrevButton = $scope.currentImgIndex > 0;
             $scope.showNextButton = $scope.currentImgIndex < $scope.howManyImgInDir - 1;
         };
+
+        var processImgRendering = function () {
+            imgService.async(dirNameFromRoute).then(function (data) {
+                allImages = data;
+                $scope.howManyImgInDir = data[dirNameFromRoute].length;
+
+                if (0 === $scope.howManyImgInDir) {
+                    $scope.resetScope();
+                    $scope.alertNoImg = true;
+                } else {
+                    displayPrevAndNextBtn();
+                    $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
+                    setLocationSearch();
+                }
+
+                $scope.spinner = false;
+            });
+        };
+
+        dirListService.async().then(function (data) {
+            $scope.dirlist = data;
+        });
 
         angular.element(document).ready(function () {
             if (dirNameFromRoute) {
@@ -87,20 +101,21 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             }
         });
 
-        /**
-         * @todo Possible to have only one $on with multiple events ?
-         */
-        $scope.$on('$routeChangeSuccess', function () {
-            setDirnameToDisplayFromRoute();
-            setIndexToDisplayFromRoute();
-            setImgToDisplayFromRoute();
+        angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
+            $scope.$on(value, function (event) {
+                setDirnameToDisplayFromRoute();
+                setIndexToDisplayFromRoute();
+                setImgToDisplayFromRoute();
+            });
         });
 
-        $scope.$on('$routeUpdate', function () {
+        $scope.resetScope = function () {
             setDirnameToDisplayFromRoute();
+            $scope.howManyImgInDir = 0;
             setIndexToDisplayFromRoute();
             setImgToDisplayFromRoute();
-        });
+            $scope.alertNoImg = false;
+        };
 
         $scope.showNextImg = function () {
             $scope.spinner = true;
@@ -122,32 +137,11 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.spinner = value;
         };
 
-        function processImgRendering() {
-            imgService.async(dirNameFromRoute).then(function (data) {
-                allImages = data;
-                $scope.howManyImgInDir = data[dirNameFromRoute].length;
-
-                if (0 === $scope.howManyImgInDir) {
-                    $scope.resetScope();
-                    $scope.alertNoImg = true;
-                } else {
-                    displayPrevAndNextBtn();
-                    $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
-                    setLocationSearch();
-                }
-
-                $scope.spinner = false;
-            });
-        }
-
         $scope.displayGallery = function () {
             $scope.spinner = true;
             processImgRendering();
         };
 
-        dirListService.async().then(function (data) {
-            $scope.dirlist = data;
-        });
     }]);
 
 gallery.directive('imageonload', function () {
@@ -174,8 +168,7 @@ gallery.directive('onchangedirectory', function () {
 });
 
 //@todo use $q
-gallery.service('imgService',
-    function ($http) {
+gallery.service('imgService', function ($http) {
         return {
             async: function (dirname) {
                 return $http.get('listfiles.php?dirname=' + dirname).then(function (response) {
@@ -188,8 +181,7 @@ gallery.service('imgService',
 
 // needs to be a promise as the data is fetch async.
 // @todo use $q
-gallery.service('dirListService',
-    function ($http) {
+gallery.service('dirListService', function ($http) {
         return {
             async: function () {
                 return $http.get('listdir.php').then(function (response) {
