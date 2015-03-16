@@ -30,8 +30,8 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
     function ($scope, imgService, dirListService, $routeParams, $location) {
 
         var dirNameFromRoute;
-        /*var imgNameFromRoute;
-        var indexFromRoute;*/
+        var imgNameFromRoute;
+        var indexFromRoute;
         var allImages;
 
         var setDirnameToDisplayFromRoute = function () {
@@ -43,23 +43,25 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.dirnameToDisplay = dirNameFromRoute;
         };
 
-        /*var setImgToDisplayFromRoute = function () {
-            console.log('setImgToDisplayFromRoute');
+        var setImgToDisplayFromRoute = function () {
             if ($routeParams.img) {
                 imgNameFromRoute = $routeParams.img;
+            } else {
+                imgNameFromRoute = null;
             }
 
             $scope.imgToDisplay = imgNameFromRoute;
         };
 
         var setIndexToDisplayFromRoute = function () {
-            console.log('setIndexToDisplayFromRoute');
             if ($routeParams.index) {
-                indexFromRoute = $routeParams.index;
+                indexFromRoute = parseInt($routeParams.index);
+            } else {
+                indexFromRoute = 0;
             }
 
-            $scope.currentImgIndex = parseInt(indexFromRoute);
-        };*/
+            $scope.currentImgIndex = indexFromRoute;
+        };
 
         var setLocationSearch = function () {
             $location.search({dir: dirNameFromRoute, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
@@ -68,8 +70,8 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         $scope.resetScope = function () {
             setDirnameToDisplayFromRoute();
             $scope.howManyImgInDir = 0;
-            $scope.currentImgIndex = 0;
-            $scope.imgToDisplay = null;
+            setIndexToDisplayFromRoute();
+            setImgToDisplayFromRoute();
             $scope.alertNoImg = false;
         };
 
@@ -78,25 +80,26 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.showNextButton = $scope.currentImgIndex < $scope.howManyImgInDir - 1;
         };
 
-
-        /*angular.element(document).ready(function () {
-            console.log('ready');
-            $scope.resetScope();
-            if ($routeParams.dir) {
-                setDirnameToDisplayFromRoute();
+        angular.element(document).ready(function () {
+            if (dirNameFromRoute) {
+                $scope.resetScope();
+                processImgRendering()
             }
-            if ($routeParams.img && $routeParams.index) {
-                setImgToDisplayFromRoute();
-                setIndexToDisplayFromRoute();
-            }
-        });*/
+        });
 
+        /**
+         * @todo Possible to have only one $on with multiple events ?
+         */
         $scope.$on('$routeChangeSuccess', function () {
             setDirnameToDisplayFromRoute();
+            setIndexToDisplayFromRoute();
+            setImgToDisplayFromRoute();
         });
 
         $scope.$on('$routeUpdate', function () {
             setDirnameToDisplayFromRoute();
+            setIndexToDisplayFromRoute();
+            setImgToDisplayFromRoute();
         });
 
         $scope.showNextImg = function () {
@@ -120,27 +123,25 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         };
 
         function processImgRendering() {
-            $scope.spinner = true;
-            imgService.returnByDirname(
-                function (data) {
-                    allImages = data;
-                    $scope.howManyImgInDir = data[dirNameFromRoute].length;
+            imgService.async(dirNameFromRoute).then(function (data) {
+                allImages = data;
+                $scope.howManyImgInDir = data[dirNameFromRoute].length;
 
-                    if (0 === $scope.howManyImgInDir) {
-                        $scope.resetScope();
-                        $scope.alertNoImg = true;
-                    } else {
-                        displayPrevAndNextBtn();
-                        $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
-                        setLocationSearch();
-                    }
+                if (0 === $scope.howManyImgInDir) {
+                    $scope.resetScope();
+                    $scope.alertNoImg = true;
+                } else {
+                    displayPrevAndNextBtn();
+                    $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
+                    setLocationSearch();
+                }
 
-
-                }, dirNameFromRoute
-            );
+                $scope.spinner = false;
+            });
         }
 
         $scope.displayGallery = function () {
+            $scope.spinner = true;
             processImgRendering();
         };
 
@@ -154,7 +155,8 @@ gallery.directive('imageonload', function () {
         restrict: 'A',
         link:     function (scope, element, attrs) {
             element.bind('load', function () {
-                scope.$apply('showSpinner(false)');
+                scope.showSpinner(false);
+                scope.$apply();
             });
         }
     };
@@ -171,18 +173,22 @@ gallery.directive('onchangedirectory', function () {
     };
 });
 
-gallery.factory("imgService",
+//@todo use $q
+gallery.service('imgService',
     function ($http) {
         return {
-            returnByDirname: function (callback, dirname) {
-                $http.get("listfiles.php?dirname=" + dirname).success(callback).error(callback);
+            async: function (dirname) {
+                return $http.get('listfiles.php?dirname=' + dirname).then(function (response) {
+                    return response.data;
+                });
             }
-        }
+        };
     }
 );
 
 // needs to be a promise as the data is fetch async.
-gallery.service("dirListService",
+// @todo use $q
+gallery.service('dirListService',
     function ($http) {
         return {
             async: function () {
