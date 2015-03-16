@@ -13,7 +13,7 @@ if (isset($_GET['dirname']) && $_GET['dirname'] !== '') {
     $authorizedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
     foreach ($dir as $fileinfo) {
         if (!$fileinfo->isDir() && !$fileinfo->isDot()) {
-            if (in_array($fileinfo->getExtension(), $authorizedExtensions)) {
+            if (in_array(strtolower($fileinfo->getExtension()), $authorizedExtensions)) {
                 $allImages[$_GET['dirname']][] = $fileinfo->getFilename();
             }
         }
