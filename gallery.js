@@ -31,7 +31,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
 
         var dirNameFromRoute;
         /*var imgNameFromRoute;
-        var indexFromRoute;/*
+        var indexFromRoute;*/
         var allImages;
 
         var setDirnameToDisplayFromRoute = function () {
