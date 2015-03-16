@@ -8,22 +8,18 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-$allImages = [];
 if (isset($_GET['dirname']) && $_GET['dirname'] !== '') {
-    $dirName = $_GET['dirname'];
-    if (false === strpos($dirName, ".") && is_dir($dirName)) {
-        if ($handle = opendir($dirName)) {
-            while (false !== ($entry = readdir($handle))) {
-                if ($entry != "." && $entry != "..") {
-                    $allImages[$dirName][] = $entry;
-                }
+    $dir                  = new DirectoryIterator($_GET['dirname']);
+    $allImages            = [];
+    $authorizedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+    foreach ($dir as $fileinfo) {
+        if (!$fileinfo->isDir() && !$fileinfo->isDot()) {
+            if (in_array($fileinfo->getExtension(), $authorizedExtensions)) {
+                $allImages[$_GET['dirname']][] = $fileinfo->getFilename();
             }
-            closedir($handle);
         }
-    } else {
-        $allImages[$dirName] = [];
     }
-}
 
-header('Content-type: application/json');
-echo json_encode($allImages);
+    header('Content-type: application/json');
+    echo json_encode($allImages);
+}
