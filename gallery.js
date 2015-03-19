@@ -26,8 +26,8 @@ gallery.config(['$routeProvider',
             });
     }]);
 
-gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location',
-    function ($scope, imgService, dirListService, $routeParams, $location) {
+gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location', '$timeout',
+    function ($scope, imgService, dirListService, $routeParams, $location, $timeout) {
 
         var dirNameFromRoute;
         var imgNameFromRoute;
@@ -37,7 +37,6 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         var setDirnameToDisplayFromRoute = function () {
             if ($routeParams.dir) {
                 dirNameFromRoute = $routeParams.dir;
-                $scope.showGoButton = true;
             }
 
             $scope.dirnameToDisplay = dirNameFromRoute;
@@ -73,20 +72,21 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         };
 
         var processImgRendering = function () {
-            imgService.async(dirNameFromRoute).then(function (data) {
-                allImages = data;
-                $scope.howManyImgInDir = data[dirNameFromRoute].length;
+            $timeout(function () {
+                imgService.async(dirNameFromRoute).then(function (data) {
+                    allImages = data;
+                    $scope.howManyImgInDir = data[dirNameFromRoute].length;
 
-                if (0 === $scope.howManyImgInDir) {
-                    $scope.resetScope();
-                    $scope.alertNoImg = true;
-                } else {
-                    displayPrevAndNextBtn();
-                    $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
-                    setLocationSearch();
-                }
+                    if (0 === $scope.howManyImgInDir) {
+                        $scope.alertNoImg = true;
+                    } else {
+                        displayPrevAndNextBtn();
+                        $scope.imgToDisplay = data[dirNameFromRoute][$scope.currentImgIndex];
+                        setLocationSearch();
+                    }
 
-                $scope.spinner = false;
+                    $scope.spinner = false;
+                });
             });
         };
 
@@ -138,6 +138,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         };
 
         $scope.displayGallery = function () {
+            $scope.resetScope();
             $scope.spinner = true;
             processImgRendering();
         };
@@ -151,17 +152,6 @@ gallery.directive('imageonload', function () {
             element.bind('load', function () {
                 scope.showSpinner(false);
                 scope.$apply();
-            });
-        }
-    };
-});
-
-gallery.directive('onchangedirectory', function () {
-    return {
-        restrict: 'A',
-        link:     function (scope, element, attrs) {
-            element.bind('click', function () {
-                scope.resetScope();
             });
         }
     };

@@ -7,7 +7,6 @@
 <header class="navbar navbar-static-top bs-docs-nav" id="top" role="banner">
     <h1 type="text" disabled="disabled">{{ dirnameToDisplay }}</h1>
     <span class="label label-info">howManyImgInDir : {{howManyImgInDir}}</span> <span class="label label-info">currentImgIndex : {{currentImgIndex}}</span>
-    <button ng-click="displayGallery()" ng-show="showGoButton" class="ng-show btn btn-default">showme</button>
     <span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
     <img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
 </header>
@@ -15,7 +14,7 @@
 <div class="row">
     <div class="col-md-2 col-sm-2 col-xs-2">
         <ul>
-            <li ng-repeat="dir in dirlist"><a href="#/show?dir={{dir}}" onchangedirectory>{{dir}}</a></li>
+            <li ng-repeat="dir in dirlist"><a href="#/show?dir={{dir}}" ng-click="displayGallery()">{{dir}}</a></li>
         </ul>
     </div>
 
