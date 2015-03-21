@@ -1,5 +1,7 @@
 .image {
-    border-radius: 25px;
+    border-radius: 15px;
+    background-color: lightgray;
+    padding: 10px;
 }
 .pager {
     cursor: pointer;

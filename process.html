@@ -6,7 +6,6 @@
      CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. -->
 <header class="navbar navbar-static-top bs-docs-nav" id="top" role="banner">
     <h1 type="text" disabled="disabled">{{ dirnameToDisplay }}</h1>
-    <span class="label label-info">howManyImgInDir : {{howManyImgInDir}}</span> <span class="label label-info">currentImgIndex : {{currentImgIndex}}</span>
     <span ng-show="alertNoImg" class="ng-show">Aucune image dans ce dossier</span>
     <img src="spinner.gif" ng-show="spinner" class="ng-show" width="16">
 </header>
@@ -29,7 +28,9 @@
             </nav>
         </div>
         <div class="col-md-10 col-sm-10 col-xs-10">
-            <img ng-src="{{dirnameToDisplay}}/{{imgToDisplay}}" class="img-responsive image" imageonload>
-        </div>
+            <div class="image" >
+                <img ng-src="{{dirnameToDisplay}}/{{imgToDisplay}}" class="img-responsive " imageonload>
+            </div>
+            </div>
     </div>
 </div>
