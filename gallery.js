@@ -17,12 +17,14 @@ gallery.config(['$routeProvider',
             when('/show/:dir?/:img?/:index?', {
                 templateUrl:    'process.html',
                 controller:     'mainctrl',
+                controllerAs:   'vm',
                 reloadOnSearch: false
             }).
             otherwise({
-                redirectTo:  '/show',
-                templateUrl: 'process.html',
-                controller:  'mainctrl'
+                redirectTo:   '/show',
+                templateUrl:  'process.html',
+                controller:   'mainctrl',
+                controllerAs: 'vm'
             });
     }]);
 
@@ -30,89 +32,90 @@ gallery.controller('mainctrl', function ($scope, imgService, dirListService, $ro
 
     var allImages;
 
-    $scope.dirnameToDisplay = $routeParams.dir;
-    $scope.imgToDisplay = $routeParams.img;
-    $scope.currentImgIndex = parseInt($routeParams.index) || 0;
+    var vm = this;
+
+    vm.dirnameToDisplay = $routeParams.dir;
+    vm.imgToDisplay = $routeParams.img;
+    vm.currentImgIndex = parseInt($routeParams.index) || 0;
 
 
     var setLocationSearch = function () {
-        $location.search({dir: $routeParams.dir, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
+        $location.search({dir: $routeParams.dir, img: vm.imgToDisplay, index: vm.currentImgIndex});
     };
 
     var displayPrevAndNextBtn = function () {
-        $scope.showPrevButton = $scope.currentImgIndex > 0;
-        $scope.showNextButton = $scope.currentImgIndex < $scope.howManyImgInDir - 1;
+        vm.showPrevButton = vm.currentImgIndex > 0;
+        vm.showNextButton = vm.currentImgIndex < vm.howManyImgInDir - 1;
     };
 
     var processImgRendering = function () {
-        imgService.async($scope.dirnameToDisplay).then(function (data) {
+        imgService.async(vm.dirnameToDisplay).then(function (data) {
             allImages = data;
-            $scope.howManyImgInDir = data[$scope.dirnameToDisplay].length;
-            if (0 === $scope.howManyImgInDir) {
-                $scope.alertNoImg = true;
+            vm.howManyImgInDir = data[vm.dirnameToDisplay].length;
+            if (0 === vm.howManyImgInDir) {
+                vm.alertNoImg = true;
             } else {
                 displayPrevAndNextBtn();
-                $scope.imgToDisplay = data[$scope.dirnameToDisplay][$scope.currentImgIndex];
+                vm.imgToDisplay = data[vm.dirnameToDisplay][vm.currentImgIndex];
             }
 
         });
-        $scope.spinner = false;
+        vm.spinner = false;
     };
 
     dirListService.async().then(function (data) {
-        $scope.dirlist = data;
+        vm.dirlist = data;
     });
 
     angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
-
         $scope.$on(value, function () {
             if ($routeParams.dir) {
                 //if we click back on the folder we are fetching, we reload
-                if ($scope.dirnameToDisplay != $routeParams.dir ||
-                    $scope.imgToDisplay != $routeParams.img ||
-                    $scope.currentImgIndex != $routeParams.index) {
-                    $scope.resetScope()
+                if (vm.dirnameToDisplay != $routeParams.dir ||
+                    vm.imgToDisplay != $routeParams.img ||
+                    vm.currentImgIndex != $routeParams.index) {
+                    vm.resetScope()
                 }
                 //if we come from bookmark or change folder
-                if ('$routeChangeSuccess' === value || $scope.dirnameToDisplay != $routeParams.dir) {
-                    $scope.dirnameToDisplay = $routeParams.dir;
-                    $scope.displayGallery();
+                if ('$routeChangeSuccess' === value || vm.dirnameToDisplay != $routeParams.dir) {
+                    vm.dirnameToDisplay = $routeParams.dir;
+                    vm.displayGallery();
                 }
             }
         });
     });
 
-    $scope.resetScope = function () {
-        $scope.dirnameToDisplay = null;
-        $scope.imgToDisplay = null;
-        $scope.currentImgIndex = 0;
-        $scope.howManyImgInDir = 0;
-        $scope.alertNoImg = false;
+    vm.resetScope = function () {
+        vm.dirnameToDisplay = null;
+        vm.imgToDisplay = null;
+        vm.currentImgIndex = 0;
+        vm.howManyImgInDir = 0;
+        vm.alertNoImg = false;
 
     };
 
-    $scope.showNextImg = function () {
-        $scope.spinner = true;
-        $scope.currentImgIndex += 1;
-        $scope.imgToDisplay = allImages[$routeParams.dir][$scope.currentImgIndex];
+    vm.showNextImg = function () {
+        vm.spinner = true;
+        vm.currentImgIndex += 1;
+        vm.imgToDisplay = allImages[$routeParams.dir][vm.currentImgIndex];
         setLocationSearch();
         displayPrevAndNextBtn();
     };
 
-    $scope.showPrevImg = function () {
-        $scope.spinner = true;
-        $scope.currentImgIndex -= 1;
-        $scope.imgToDisplay = allImages[$routeParams.dir][$scope.currentImgIndex];
+    vm.showPrevImg = function () {
+        vm.spinner = true;
+        vm.currentImgIndex -= 1;
+        vm.imgToDisplay = allImages[$routeParams.dir][vm.currentImgIndex];
         setLocationSearch();
         displayPrevAndNextBtn();
     };
 
-    $scope.showSpinner = function (value) {
-        $scope.spinner = value;
+    vm.showSpinner = function (value) {
+        vm.spinner = value;
     };
 
-    $scope.displayGallery = function () {
-        $scope.spinner = true;
+    vm.displayGallery = function () {
+        vm.spinner = true;
         processImgRendering();
     };
 
@@ -124,7 +127,7 @@ gallery.directive('imageonload', function () {
         restrict: 'A',
         link:     function (scope, element, attrs) {
             element.bind('load', function () {
-                scope.showSpinner(false);
+                scope.vm.showSpinner(false);
                 scope.$apply();
             });
         }
