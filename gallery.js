@@ -26,47 +26,15 @@ gallery.config(['$routeProvider',
             });
     }]);
 
-gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location', '$timeout',
-    function ($scope, imgService, dirListService, $routeParams, $location, $timeout) {
+gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location',
+    function ($scope, imgService, dirListService, $routeParams, $location) {
 
-        var dirNameFromRoute;
-        var imgNameFromRoute;
-        var indexFromRoute;
         var allImages;
 
-        //var setDirnameToDisplayFromRoute = function () {
-        //    console.log('1', $routeParams.dir);
-        //    if ($routeParams.dir) {
-        //        dirNameFromRoute = $routeParams.dir;
-        //    }
-        //
-        //    $scope.dirnameToDisplay = dirNameFromRoute;
-        //};
         $scope.dirnameToDisplay = $routeParams.dir;
         $scope.imgToDisplay = $routeParams.img;
         $scope.currentImgIndex = parseInt($routeParams.index) || 0;
 
-        /*var setImgToDisplayFromRoute = function () {
-            console.log('2', $scope.dirnameToDisplay);
-            if ($routeParams.img) {
-                imgNameFromRoute = $routeParams.img;
-            } else {
-                imgNameFromRoute = null;
-            }
-
-            $scope.imgToDisplay = imgNameFromRoute;
-        };*/
-
-        /*var setIndexToDisplayFromRoute = function () {
-            console.log('3', $scope.dirnameToDisplay);
-            if ($routeParams.index) {
-                indexFromRoute = parseInt($routeParams.index);
-            } else {
-                indexFromRoute = 0;
-            }
-
-            $scope.currentImgIndex = indexFromRoute;
-        };*/
 
         var setLocationSearch = function () {
             console.log('4');
@@ -80,25 +48,23 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
         };
 
         var processImgRendering = function () {
-            console.log('6', $routeParams.dir);
-            //$timeout(function () {
-            imgService.async($routeParams.dir).then(function (data) {
+            console.log('6', $scope.dirnameToDisplay);
+            imgService.async($scope.dirnameToDisplay).then(function (data) {
                 allImages = data;
                 console.log(allImages);
-                $scope.howManyImgInDir = data[$routeParams.dir].length;
-        console.log('$scope.howManyImgInDir',$scope.howManyImgInDir);
+                $scope.howManyImgInDir = data[$scope.dirnameToDisplay].length;
+                console.log('$scope.howManyImgInDir', $scope.howManyImgInDir);
                 if (0 === $scope.howManyImgInDir) {
                     $scope.alertNoImg = true;
                 } else {
                     displayPrevAndNextBtn();
                     console.log('$scope.currentImgIndex', $scope.currentImgIndex);
-                    $scope.imgToDisplay = data[$routeParams.dir][$scope.currentImgIndex];
-                    setLocationSearch();
+                    $scope.imgToDisplay = data[$scope.dirnameToDisplay][$scope.currentImgIndex];
+                    //setLocationSearch();
                 }
 
-                $scope.spinner = false;
             });
-            //});
+            $scope.spinner = false;
         };
 
         dirListService.async().then(function (data) {
@@ -106,40 +72,37 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
             $scope.dirlist = data;
         });
 
-        angular.element(document).ready(function () {
-            console.log('8');
-            if ($routeParams.dir) {
-                $scope.resetScope();
-                processImgRendering()
-            }
-        });
-
         angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
 
             $scope.$on(value, function () {
-                console.log($routeParams.dir);
-                if($routeParams.dir)
-                $scope.displayGallery();
-
-                /*console.log(value);
-                console.log('9');
-
-                setDirnameToDisplayFromRoute();
-                setIndexToDisplayFromRoute();
-                setImgToDisplayFromRoute();
+                console.log(value);
+                console.log('scope.$on', $routeParams.dir);
                 if ($routeParams.dir) {
-                    processImgRendering();
-                }*/
+                    //if we click back on the folder we are fetching, we reload
+                    if ($scope.dirnameToDisplay != $routeParams.dir ||
+                        $scope.imgToDisplay != $routeParams.img ||
+                        $scope.currentImgIndex != $routeParams.index) {
+                        console.log('resestscope');
+                        $scope.resetScope()
+                    }
+                    //if we come from bookmark or change folder
+                    if ('$routeChangeSuccess' === value || $scope.dirnameToDisplay != $routeParams.dir) {
+                        console.log('displaygalroutechange');
+                        $scope.dirnameToDisplay = $routeParams.dir;
+                        $scope.displayGallery();
+                    }
+                }
             });
         });
 
         $scope.resetScope = function () {
             console.log('10', $scope.dirnameToDisplay);
-            //setDirnameToDisplayFromRoute();
+            $scope.dirnameToDisplay = null;
+            $scope.imgToDisplay = null;
+            $scope.currentImgIndex = 0;
             $scope.howManyImgInDir = 0;
-            //setIndexToDisplayFromRoute();
-            //setImgToDisplayFromRoute();
             $scope.alertNoImg = false;
+
         };
 
         $scope.showNextImg = function () {
@@ -167,7 +130,7 @@ gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$rout
 
         $scope.displayGallery = function () {
             console.log('14', $scope.dirnameToDisplay);
-            $scope.resetScope();
+            //$scope.resetScope();
             $scope.spinner = true;
             processImgRendering();
         };
