@@ -26,123 +26,103 @@ gallery.config(['$routeProvider',
             });
     }]);
 
-gallery.controller('mainctrl', ['$scope', 'imgService', 'dirListService', '$routeParams', '$location',
-    function ($scope, imgService, dirListService, $routeParams, $location) {
+gallery.controller('mainctrl', function ($scope, imgService, dirListService, $routeParams, $location) {
 
-        var allImages;
+    var allImages;
 
-        $scope.dirnameToDisplay = $routeParams.dir;
-        $scope.imgToDisplay = $routeParams.img;
-        $scope.currentImgIndex = parseInt($routeParams.index) || 0;
+    $scope.dirnameToDisplay = $routeParams.dir;
+    $scope.imgToDisplay = $routeParams.img;
+    $scope.currentImgIndex = parseInt($routeParams.index) || 0;
 
 
-        var setLocationSearch = function () {
-            console.log('4');
-            $location.search({dir: $routeParams.dir, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
-        };
+    var setLocationSearch = function () {
+        $location.search({dir: $routeParams.dir, img: $scope.imgToDisplay, index: $scope.currentImgIndex});
+    };
 
-        var displayPrevAndNextBtn = function () {
-            console.log('5');
-            $scope.showPrevButton = $scope.currentImgIndex > 0;
-            $scope.showNextButton = $scope.currentImgIndex < $scope.howManyImgInDir - 1;
-        };
+    var displayPrevAndNextBtn = function () {
+        $scope.showPrevButton = $scope.currentImgIndex > 0;
+        $scope.showNextButton = $scope.currentImgIndex < $scope.howManyImgInDir - 1;
+    };
 
-        var processImgRendering = function () {
-            console.log('6', $scope.dirnameToDisplay);
-            imgService.async($scope.dirnameToDisplay).then(function (data) {
-                allImages = data;
-                console.log(allImages);
-                $scope.howManyImgInDir = data[$scope.dirnameToDisplay].length;
-                console.log('$scope.howManyImgInDir', $scope.howManyImgInDir);
-                if (0 === $scope.howManyImgInDir) {
-                    $scope.alertNoImg = true;
-                } else {
-                    displayPrevAndNextBtn();
-                    console.log('$scope.currentImgIndex', $scope.currentImgIndex);
-                    $scope.imgToDisplay = data[$scope.dirnameToDisplay][$scope.currentImgIndex];
-                    //setLocationSearch();
-                }
+    var processImgRendering = function () {
+        imgService.async($scope.dirnameToDisplay).then(function (data) {
+            allImages = data;
+            $scope.howManyImgInDir = data[$scope.dirnameToDisplay].length;
+            if (0 === $scope.howManyImgInDir) {
+                $scope.alertNoImg = true;
+            } else {
+                displayPrevAndNextBtn();
+                $scope.imgToDisplay = data[$scope.dirnameToDisplay][$scope.currentImgIndex];
+            }
 
-            });
-            $scope.spinner = false;
-        };
-
-        dirListService.async().then(function (data) {
-            console.log('7');
-            $scope.dirlist = data;
         });
+        $scope.spinner = false;
+    };
 
-        angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
+    dirListService.async().then(function (data) {
+        $scope.dirlist = data;
+    });
 
-            $scope.$on(value, function () {
-                console.log(value);
-                console.log('scope.$on', $routeParams.dir);
-                if ($routeParams.dir) {
-                    //if we click back on the folder we are fetching, we reload
-                    if ($scope.dirnameToDisplay != $routeParams.dir ||
-                        $scope.imgToDisplay != $routeParams.img ||
-                        $scope.currentImgIndex != $routeParams.index) {
-                        console.log('resestscope');
-                        $scope.resetScope()
-                    }
-                    //if we come from bookmark or change folder
-                    if ('$routeChangeSuccess' === value || $scope.dirnameToDisplay != $routeParams.dir) {
-                        console.log('displaygalroutechange');
-                        $scope.dirnameToDisplay = $routeParams.dir;
-                        $scope.displayGallery();
-                    }
+    angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
+
+        $scope.$on(value, function () {
+            if ($routeParams.dir) {
+                //if we click back on the folder we are fetching, we reload
+                if ($scope.dirnameToDisplay != $routeParams.dir ||
+                    $scope.imgToDisplay != $routeParams.img ||
+                    $scope.currentImgIndex != $routeParams.index) {
+                    $scope.resetScope()
                 }
-            });
+                //if we come from bookmark or change folder
+                if ('$routeChangeSuccess' === value || $scope.dirnameToDisplay != $routeParams.dir) {
+                    $scope.dirnameToDisplay = $routeParams.dir;
+                    $scope.displayGallery();
+                }
+            }
         });
+    });
 
-        $scope.resetScope = function () {
-            console.log('10', $scope.dirnameToDisplay);
-            $scope.dirnameToDisplay = null;
-            $scope.imgToDisplay = null;
-            $scope.currentImgIndex = 0;
-            $scope.howManyImgInDir = 0;
-            $scope.alertNoImg = false;
+    $scope.resetScope = function () {
+        $scope.dirnameToDisplay = null;
+        $scope.imgToDisplay = null;
+        $scope.currentImgIndex = 0;
+        $scope.howManyImgInDir = 0;
+        $scope.alertNoImg = false;
 
-        };
+    };
 
-        $scope.showNextImg = function () {
-            console.log('11');
-            $scope.spinner = true;
-            $scope.currentImgIndex += 1;
-            $scope.imgToDisplay = allImages[$routeParams.dir][$scope.currentImgIndex];
-            setLocationSearch();
-            displayPrevAndNextBtn();
-        };
+    $scope.showNextImg = function () {
+        $scope.spinner = true;
+        $scope.currentImgIndex += 1;
+        $scope.imgToDisplay = allImages[$routeParams.dir][$scope.currentImgIndex];
+        setLocationSearch();
+        displayPrevAndNextBtn();
+    };
 
-        $scope.showPrevImg = function () {
-            console.log('12');
-            $scope.spinner = true;
-            $scope.currentImgIndex -= 1;
-            $scope.imgToDisplay = allImages[$routeParams.dir][$scope.currentImgIndex];
-            setLocationSearch();
-            displayPrevAndNextBtn();
-        };
+    $scope.showPrevImg = function () {
+        $scope.spinner = true;
+        $scope.currentImgIndex -= 1;
+        $scope.imgToDisplay = allImages[$routeParams.dir][$scope.currentImgIndex];
+        setLocationSearch();
+        displayPrevAndNextBtn();
+    };
 
-        $scope.showSpinner = function (value) {
-            console.log('13');
-            $scope.spinner = value;
-        };
+    $scope.showSpinner = function (value) {
+        $scope.spinner = value;
+    };
 
-        $scope.displayGallery = function () {
-            console.log('14', $scope.dirnameToDisplay);
-            //$scope.resetScope();
-            $scope.spinner = true;
-            processImgRendering();
-        };
+    $scope.displayGallery = function () {
+        $scope.spinner = true;
+        processImgRendering();
+    };
 
-    }]);
+});
 
 gallery.directive('imageonload', function () {
 
     return {
         restrict: 'A',
         link:     function (scope, element, attrs) {
-            console.log('15');
             element.bind('load', function () {
                 scope.showSpinner(false);
                 scope.$apply();
@@ -156,7 +136,6 @@ gallery.service('imgService', function ($http) {
         return {
             async: function (dirname) {
                 return $http.get('listfiles.php?dirname=' + dirname).then(function (response) {
-                    console.log('16');
                     return response.data;
                 });
             }
@@ -169,7 +148,6 @@ gallery.service('dirListService', function ($http) {
         return {
             async: function () {
                 return $http.get('listdir.php').then(function (response) {
-                    console.log('17');
                     return response.data;
                 });
             }
