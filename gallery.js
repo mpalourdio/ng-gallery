@@ -132,8 +132,8 @@ gallery.factory('handleRouteChange', function ($routeParams) {
             return false;
 
         },
-        doDisplayGallery:  function (dirnameToDisplay, value) {
-            if ('$routeChangeSuccess' === value || dirnameToDisplay != $routeParams.dir) {
+        doDisplayGallery:  function (dirnameToDisplay, routeChangeEvent) {
+            if ('$routeChangeSuccess' === routeChangeEvent || dirnameToDisplay != $routeParams.dir) {
                 return true;
             }
             return false;
