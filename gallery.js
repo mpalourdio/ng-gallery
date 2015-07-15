@@ -51,22 +51,22 @@ gallery.controller('mainctrl', function ($scope, imgService, dirListService, $ro
     };
 
     var processImgRendering = function () {
-        imgService.async(vm.dirnameToDisplay).then(function (data) {
-            allImages          = data;
-            vm.howManyImgInDir = data[vm.dirnameToDisplay].length;
+        imgService.getImages(vm.dirnameToDisplay).then(function (results) {
+            allImages          = results.data;
+            vm.howManyImgInDir = results.data[vm.dirnameToDisplay].length;
             if (0 === vm.howManyImgInDir) {
                 vm.alertNoImg = true;
             } else {
                 displayPrevAndNextBtn();
-                vm.imgToDisplay = data[vm.dirnameToDisplay][vm.currentImgIndex];
+                vm.imgToDisplay = results.data[vm.dirnameToDisplay][vm.currentImgIndex];
             }
 
         });
         vm.spinner = false;
     };
 
-    dirListService.async().then(function (data) {
-        vm.dirlist = data;
+    dirListService.getAll().then(function (results) {
+        vm.dirlist = results.data;
     });
 
     angular.forEach(['$routeChangeSuccess', '$routeUpdate'], function (value) {
@@ -142,7 +142,6 @@ gallery.factory('handleRouteChange', function ($routeParams) {
 });
 
 gallery.directive('imageonload', function () {
-
     return {
         restrict: 'A',
         link:     function (scope, element, attrs) {
@@ -155,23 +154,17 @@ gallery.directive('imageonload', function () {
 });
 
 gallery.factory('imgService', function ($http) {
-
     return {
-        async: function (dirname) {
-            return $http.get('listfiles.php?dirname=' + dirname).then(function (response) {
-                return response.data;
-            });
+        getImages: function (dirname) {
+            return $http.get('listfiles.php?dirname=' + dirname);
         }
     };
 });
 
 gallery.factory('dirListService', function ($http) {
-
     return {
-        async: function () {
-            return $http.get('listdir.php').then(function (response) {
-                return response.data;
-            });
+        getAll: function () {
+            return $http.get('listdir.php');
         }
     };
 });
