@@ -28,19 +28,21 @@ gallery.config(['$routeProvider',
             });
     }]);
 
-gallery.controller('mainctrl', function ($scope, imgService, dirListService, $routeParams, $location) {
+gallery.controller('mainctrl', function ($scope, imgService, dirListService, $routeParams, $location, handleRouteChange) {
 
     var allImages;
-
     var vm = this;
 
     vm.dirnameToDisplay = $routeParams.dir;
-    vm.imgToDisplay = $routeParams.img;
-    vm.currentImgIndex = parseInt($routeParams.index) || 0;
-
+    vm.imgToDisplay     = $routeParams.img;
+    vm.currentImgIndex  = parseInt($routeParams.index) || 0;
 
     var setLocationSearch = function () {
-        $location.search({dir: $routeParams.dir, img: vm.imgToDisplay, index: vm.currentImgIndex});
+        $location.search({
+            dir:   $routeParams.dir,
+            img:   vm.imgToDisplay,
+            index: vm.currentImgIndex
+        });
     };
 
     var displayPrevAndNextBtn = function () {
@@ -50,7 +52,7 @@ gallery.controller('mainctrl', function ($scope, imgService, dirListService, $ro
 
     var processImgRendering = function () {
         imgService.async(vm.dirnameToDisplay).then(function (data) {
-            allImages = data;
+            allImages          = data;
             vm.howManyImgInDir = data[vm.dirnameToDisplay].length;
             if (0 === vm.howManyImgInDir) {
                 vm.alertNoImg = true;
@@ -71,31 +73,29 @@ gallery.controller('mainctrl', function ($scope, imgService, dirListService, $ro
         $scope.$on(value, function () {
             if ($routeParams.dir) {
                 //if we click back on the folder we are fetching, we reload
-                if (vm.dirnameToDisplay != $routeParams.dir ||
-                    vm.imgToDisplay != $routeParams.img ||
-                    vm.currentImgIndex != $routeParams.index) {
+                if (handleRouteChange.hasScopeToBeReset(vm.dirnameToDisplay, vm.imgToDisplay, vm.currentImgIndex)) {
                     vm.resetScope()
                 }
-                //if we come from bookmark or change folder
-                if ('$routeChangeSuccess' === value || vm.dirnameToDisplay != $routeParams.dir) {
+                if (handleRouteChange.doDisplayGallery(vm.dirnameToDisplay, value)) {
                     vm.dirnameToDisplay = $routeParams.dir;
                     vm.displayGallery();
                 }
+
             }
         });
     });
 
     vm.resetScope = function () {
         vm.dirnameToDisplay = null;
-        vm.imgToDisplay = null;
-        vm.currentImgIndex = 0;
-        vm.howManyImgInDir = 0;
-        vm.alertNoImg = false;
+        vm.imgToDisplay     = null;
+        vm.currentImgIndex  = 0;
+        vm.howManyImgInDir  = 0;
+        vm.alertNoImg       = false;
 
     };
 
     vm.showNextImg = function () {
-        vm.spinner = true;
+        vm.spinner      = true;
         vm.currentImgIndex += 1;
         vm.imgToDisplay = allImages[$routeParams.dir][vm.currentImgIndex];
         setLocationSearch();
@@ -103,7 +103,7 @@ gallery.controller('mainctrl', function ($scope, imgService, dirListService, $ro
     };
 
     vm.showPrevImg = function () {
-        vm.spinner = true;
+        vm.spinner      = true;
         vm.currentImgIndex -= 1;
         vm.imgToDisplay = allImages[$routeParams.dir][vm.currentImgIndex];
         setLocationSearch();
@@ -118,7 +118,27 @@ gallery.controller('mainctrl', function ($scope, imgService, dirListService, $ro
         vm.spinner = true;
         processImgRendering();
     };
+});
 
+gallery.factory('handleRouteChange', function ($routeParams) {
+    return {
+        hasScopeToBeReset: function (dirnameToDisplay, imgToDisplay, currentImgIndex) {
+            if (dirnameToDisplay != $routeParams.dir ||
+                imgToDisplay != $routeParams.img ||
+                currentImgIndex != $routeParams.index) {
+                return true;
+
+            }
+            return false;
+
+        },
+        doDisplayGallery:  function (dirnameToDisplay, value) {
+            if ('routeChangeSuccess' === value || dirnameToDisplay != $routeParams.dir) {
+                return true;
+            }
+            return false;
+        }
+    }
 });
 
 gallery.directive('imageonload', function () {
@@ -134,26 +154,24 @@ gallery.directive('imageonload', function () {
     };
 });
 
-gallery.service('imgService', function ($http) {
+gallery.factory('imgService', function ($http) {
 
-        return {
-            async: function (dirname) {
-                return $http.get('listfiles.php?dirname=' + dirname).then(function (response) {
-                    return response.data;
-                });
-            }
-        };
-    }
-);
+    return {
+        async: function (dirname) {
+            return $http.get('listfiles.php?dirname=' + dirname).then(function (response) {
+                return response.data;
+            });
+        }
+    };
+});
 
-gallery.service('dirListService', function ($http) {
+gallery.factory('dirListService', function ($http) {
 
-        return {
-            async: function () {
-                return $http.get('listdir.php').then(function (response) {
-                    return response.data;
-                });
-            }
-        };
-    }
-);
+    return {
+        async: function () {
+            return $http.get('listdir.php').then(function (response) {
+                return response.data;
+            });
+        }
+    };
+});
