@@ -9,10 +9,10 @@
  */
 $allImages[$_GET['dirname']] = [];
 if (isset($_GET['dirname']) && $_GET['dirname'] !== '') {
-    $dir                  = new DirectoryIterator($_GET['dirname']);
+    $dir = new DirectoryIterator(basename($_GET['dirname']));
     $authorizedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
     foreach ($dir as $fileinfo) {
-        if (!$fileinfo->isDir() && !$fileinfo->isDot()) {
+        if (! $fileinfo->isDir() && ! $fileinfo->isDot()) {
             if (in_array(strtolower($fileinfo->getExtension()), $authorizedExtensions)) {
                 $allImages[$_GET['dirname']][] = $fileinfo->getFilename();
             }
