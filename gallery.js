@@ -24,7 +24,7 @@
                     redirectTo: '/show',
                     templateUrl: 'process.html',
                     controller: 'mainctrl',
-                    controllerAs: 'vm',
+                    controllerAs: 'vm'
                 });
         }]);
 
@@ -38,7 +38,7 @@
             var allImages;
 
             var setDirnameToDisplayFromRoute = function () {
-                if ($routeParams.dir) {
+                if (!!$routeParams.dir) {
                     dirNameFromRoute = $routeParams.dir;
                 }
 
@@ -46,7 +46,7 @@
             };
 
             var setImgToDisplayFromRoute = function () {
-                if ($routeParams.img) {
+                if (!!$routeParams.img) {
                     imgNameFromRoute = $routeParams.img;
                 } else {
                     imgNameFromRoute = null;
@@ -56,7 +56,7 @@
             };
 
             var setIndexToDisplayFromRoute = function () {
-                if ($routeParams.index) {
+                if (!!$routeParams.index) {
                     indexFromRoute = parseInt($routeParams.index);
                 } else {
                     indexFromRoute = 0;
